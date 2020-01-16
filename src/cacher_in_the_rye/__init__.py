@@ -5,4 +5,7 @@
 # Support: https://github.com/lovac42/TheCacherInTheRye
 
 
-from . import windowsAudioCacher
+from anki.utils import isWin
+
+if isWin:
+    from . import windowsAudioCacher

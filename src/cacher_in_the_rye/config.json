@@ -1,3 +1,4 @@
 {
-	"cache_size": 64
+	"cache_size": 64,
+	"direct_access_mode": false
 }

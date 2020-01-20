@@ -9,6 +9,7 @@ import os, random
 from anki.hooks import addHook
 from anki.utils import tmpdir
 
+
 try:
     #test if v2.1.17++
     from aqt.sound import _player
@@ -20,6 +21,8 @@ except ImportError:
 
 
 from .config import Config
+from .test import selfTest
+DEV_MODE = os.getenv("ANKIDEV", "")
 ADDON_NAME = "CACHER_IN_THE_RYE"
 conf = Config(ADDON_NAME)
 
@@ -30,19 +33,23 @@ def onShowQuestion(): #Clears cache on new Q
     limit=conf.get("cache_size", 64)
     if limit and len(audio_cached)>limit:
         audio_cached={}
-addHook('showQuestion', onShowQuestion)
+
+if not conf.get("direct_access_mode", False):
+    addHook('showQuestion', onShowQuestion)
 
 
 
 #FROM: aqt.sound.queueMplayer v2.1.19 SRC
-#MODS: cacher
+#MODS: added cacher
 def queueMplayerWithCache(path):
-    if os.getenv("ANKIDEV", False):
-        from .test import selfTest
+    if DEV_MODE:
         selfTest()
 
     s.ensureMplayerThreads()
-    if os.path.exists(path):
+    if conf.get("direct_access_mode", False):
+        # Modern versions of mplayer seems to have this unicode bug fixed.
+        path=path.replace("\\", "/")
+    elif os.path.exists(path):
         if path in audio_cached:
             path=audio_cached[path]
         else:
